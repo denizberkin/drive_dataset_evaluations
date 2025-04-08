@@ -7,19 +7,21 @@ from utils.preprocessing import set_seed, get_retinal_transforms
 from utils.dataset import get_loaders
 from utils.optim import optimizer_setup
 from utils.loss import BCEDiceLoss
+from src.train import train_model
+
 from utils.swin_res_unet import SwinResUNet
 from utils.unet import UNet
-from src.train import train_model
 
 
 if __name__ == "__main__":
     # paths
     EXP_BASE_DIR = "experiments"
-    EXP_NAME = "vanilla_unet"  # further used setting output directory to save models and logs
+    EXP_NAME = "unet_aug_scheduler"  # further used setting output directory to save models and logs
     DATA_DIR = "data/"
     # hyperparameters
+    IMG_SIZE = 512
     BATCH_SIZE = 4
-    LR = 1.e-4
+    LR = 4.e-4
     NUM_EPOCHS = 40
     DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
     
@@ -28,8 +30,8 @@ if __name__ == "__main__":
     os.makedirs(EXP_BASE_DIR, exist_ok=True)
     os.makedirs(EXP_NAME, exist_ok=True)
     
-    transforms = get_retinal_transforms(is_train=True)
-    test_transforms = get_retinal_transforms(is_train=False)
+    transforms = get_retinal_transforms(resize_to=IMG_SIZE, is_train=True)
+    test_transforms = get_retinal_transforms(resize_to=IMG_SIZE, is_train=False)
     dl_train, dl_test, ds_train, ds_test = get_loaders(
         data_dir=DATA_DIR, 
         batch_size=BATCH_SIZE, 
@@ -38,8 +40,8 @@ if __name__ == "__main__":
         )
     
     # Change model here
-    model = SwinResUNet().to(DEVICE)
-    optimizer, scheduler = optimizer_setup(model=model, num_epochs=NUM_EPOCHS)
+    model = UNet().to(DEVICE)
+    optimizer, scheduler = optimizer_setup(model=model, num_epochs=NUM_EPOCHS, lr=LR)
     criterion = BCEDiceLoss().to(DEVICE)
     
     # train the model

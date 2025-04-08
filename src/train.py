@@ -57,8 +57,8 @@ def train_model(
         val_loss, val_mean_metrics, val_metrics = validate_one_epoch(model, val_loader, criterion, device)
         tqdm.write(f"Validation Loss: {val_loss:.4f}")
         tqdm.write("Validation Metrics:")
-        for metric_name, metric_value in val_metrics.items():
-            tqdm.write(f"  {metric_name}: {metric_value:.4f}")
+        for metric_name, metric_value in val_mean_metrics.items():
+            tqdm.write(f"  {metric_name}: {metric_value:.4f}", end="\t")
 
         if scheduler:
             scheduler.step()

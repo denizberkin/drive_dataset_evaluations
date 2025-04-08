@@ -8,10 +8,10 @@ from torch.utils.data import Dataset
 
 
 class DriveDataset(Dataset):
-    def __init__(self, image_dir, mask_dir, transform=None):
+    def __init__(self, image_dir, mask_dir, transform: tuple = None):
         self.image_paths = sorted(glob(os.path.join(image_dir, '*.png')))
         self.mask_paths = sorted(glob(os.path.join(mask_dir, '*.png')))
-        self.transform = transform
+        self.transform, self.mask_transform = transform
 
     def __len__(self):
         return len(self.image_paths)
@@ -20,12 +20,13 @@ class DriveDataset(Dataset):
         image = np.array(Image.open(self.image_paths[idx]).convert("RGB"))
         mask = np.array(Image.open(self.mask_paths[idx]).convert("L"))
 
-        if self.transform:
-            augmented = self.transform(image=image, mask=mask)
-            image = augmented["image"]
-            mask = augmented["mask"]
+        if self.transform and self.mask_transform:
+            image = self.transform(image=image)["image"]
+            mask = self.mask_transform(image=mask)["image"]
+            
+            mask = (mask > 127).float()  # Convert mask to binary after resize!
 
-        return image, mask.float().unsqueeze(0) / 255.0
+        return image, mask
 
 
 def get_loaders(data_dir: str, batch_size: int, num_workers: int = 4,
