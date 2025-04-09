@@ -40,7 +40,6 @@ if __name__ == "__main__":
     
     # Change model here
     model = SwinUnet().to(DEVICE)
-    print()
     optimizer, scheduler = optimizer_setup(model=model, num_epochs=NUM_EPOCHS, lr=LR)
     criterion = BCEDiceLoss().to(DEVICE)
     
