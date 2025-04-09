@@ -60,6 +60,8 @@ def train_model(
         for metric_name, metric_value in val_mean_metrics.items():
             tqdm.write(f"  {metric_name}: {metric_value:.4f}", end="\t")
 
+        tqdm.write("")
+
         if scheduler:
             scheduler.step()
             

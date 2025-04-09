@@ -1,4 +1,5 @@
 import os
+import time
 
 import torch
 import pandas as pd
@@ -10,6 +11,7 @@ from utils.loss import BCEDiceLoss
 from src.train import train_model
 
 from utils.swin_res_unet import SwinResUNet
+from utils.swin_unet import SwinUnet
 from utils.unet import UNet
 
 
@@ -26,9 +28,6 @@ if __name__ == "__main__":
     DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
     
     set_seed(42)  # set seed for reproducibility
-
-    os.makedirs(EXP_BASE_DIR, exist_ok=True)
-    os.makedirs(EXP_NAME, exist_ok=True)
     
     transforms = get_retinal_transforms(resize_to=IMG_SIZE, is_train=True)
     test_transforms = get_retinal_transforms(resize_to=IMG_SIZE, is_train=False)
@@ -40,7 +39,7 @@ if __name__ == "__main__":
         )
     
     # Change model here
-    model = UNet().to(DEVICE)
+    model = SwinUnet().to(DEVICE)
     optimizer, scheduler = optimizer_setup(model=model, num_epochs=NUM_EPOCHS, lr=LR)
     criterion = BCEDiceLoss().to(DEVICE)
     
@@ -57,12 +56,18 @@ if __name__ == "__main__":
         )
     
     # Save the model
-    model_save_path = os.path.join(EXP_BASE_DIR, EXP_NAME, f"{str(model)}_model.pth")
+    root_path = os.path.join(EXP_BASE_DIR, EXP_NAME)
+    os.makedirs(root_path, exist_ok=True)
+
+    model_name = type(model).__name__
+    experiment_timestamp = int(time.time())
+
+    model_save_path = os.path.join(root_path, f"{model_name}_{experiment_timestamp}_model.pth")
     torch.save(model.state_dict(), model_save_path)
     print(f"Model saved to {model_save_path}")
     
     # Save the training results
-    results_save_path = os.path.join(EXP_BASE_DIR, EXP_NAME, f"{str(model)}_results.csv")
+    results_save_path = os.path.join(root_path, f"{model_name}_{experiment_timestamp}_results.csv")
     val_results_df = pd.DataFrame(val_results)  # key, list of values
     val_results_df.to_csv(results_save_path, index=False)
     print(f"Val results saved to {results_save_path}")
