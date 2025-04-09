@@ -21,35 +21,59 @@ from .swin_transformer_unet_skip_expand_decoder_sys import SwinTransformerSys
 logger = logging.getLogger(__name__)
 
 class SwinUnet(nn.Module):
-    def __init__(self, config, img_size=224, num_classes=21843, zero_head=False, vis=False):
+    def __init__(
+        self,
+        img_size=512,
+        patch_size=4,
+        in_chans=3,
+        num_classes=1,
+        embed_dim=96,
+        depths=[2, 2, 6, 2],
+        num_heads=[3, 6, 12, 24],
+        window_size=16,
+        mlp_ratio=4.0,
+        qkv_bias=True,
+        qk_scale=None,
+        drop_rate=0.0,
+        drop_path_rate=0.1,
+        ape=False,
+        patch_norm=True,
+        use_checkpoint=False,
+        zero_head=False,
+        vis=False
+    ):
         super(SwinUnet, self).__init__()
         self.num_classes = num_classes
         self.zero_head = zero_head
-        self.config = config
+        # self.config = config
 
-        self.swin_unet = SwinTransformerSys(img_size=config.DATA.IMG_SIZE,
-                                patch_size=config.MODEL.SWIN.PATCH_SIZE,
-                                in_chans=config.MODEL.SWIN.IN_CHANS,
-                                num_classes=self.num_classes,
-                                embed_dim=config.MODEL.SWIN.EMBED_DIM,
-                                depths=config.MODEL.SWIN.DEPTHS,
-                                num_heads=config.MODEL.SWIN.NUM_HEADS,
-                                window_size=config.MODEL.SWIN.WINDOW_SIZE,
-                                mlp_ratio=config.MODEL.SWIN.MLP_RATIO,
-                                qkv_bias=config.MODEL.SWIN.QKV_BIAS,
-                                qk_scale=config.MODEL.SWIN.QK_SCALE,
-                                drop_rate=config.MODEL.DROP_RATE,
-                                drop_path_rate=config.MODEL.DROP_PATH_RATE,
-                                ape=config.MODEL.SWIN.APE,
-                                patch_norm=config.MODEL.SWIN.PATCH_NORM,
-                                use_checkpoint=config.TRAIN.USE_CHECKPOINT
-                                )
+        self.swin_unet = SwinTransformerSys(
+            img_size=img_size,
+            patch_size=patch_size,
+            in_chans=in_chans,
+            num_classes=num_classes,
+            embed_dim=embed_dim,
+            depths=depths,
+            num_heads=num_heads,
+            window_size=window_size,
+            mlp_ratio=mlp_ratio,
+            qkv_bias=qkv_bias,
+            qk_scale=qk_scale,
+            drop_rate=drop_rate,
+            drop_path_rate=drop_path_rate,
+            ape=ape,
+            patch_norm=patch_norm,
+            use_checkpoint=use_checkpoint,
+        )
+
+        self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
         if x.size()[1] == 1:
             x = x.repeat(1,3,1,1)
         logits = self.swin_unet(x)
-        return logits
+        preds = self.sigmoid(logits)
+        return preds
 
     def load_from(self, config):
         pretrained_path = config.MODEL.PRETRAIN_CKPT

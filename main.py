@@ -10,6 +10,7 @@ from utils.loss import BCEDiceLoss
 from src.train import train_model
 
 from utils.swin_res_unet import SwinResUNet
+from utils.swin_unet import SwinUnet
 from utils.unet import UNet
 
 
@@ -23,7 +24,7 @@ if __name__ == "__main__":
     BATCH_SIZE = 4
     LR = 4.e-4
     NUM_EPOCHS = 40
-    DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+    DEVICE = "cpu" if torch.cuda.is_available() else "cpu"
     
     set_seed(42)  # set seed for reproducibility
 
@@ -40,7 +41,7 @@ if __name__ == "__main__":
         )
     
     # Change model here
-    model = UNet().to(DEVICE)
+    model = SwinUnet().to(DEVICE)
     optimizer, scheduler = optimizer_setup(model=model, num_epochs=NUM_EPOCHS, lr=LR)
     criterion = BCEDiceLoss().to(DEVICE)
     
