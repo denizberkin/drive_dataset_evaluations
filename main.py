@@ -1,4 +1,5 @@
 import os
+import time
 
 import torch
 import pandas as pd
@@ -60,13 +61,14 @@ if __name__ == "__main__":
     os.makedirs(root_path, exist_ok=True)
 
     model_name = type(model).__name__
+    experiment_timestamp = int(time.time())
 
-    model_save_path = os.path.join(root_path, f"{model_name}_model.pth")
+    model_save_path = os.path.join(root_path, f"{model_name}_{experiment_timestamp}_model.pth")
     torch.save(model.state_dict(), model_save_path)
     print(f"Model saved to {model_save_path}")
     
     # Save the training results
-    results_save_path = os.path.join(root_path, f"{model_name}_results.csv")
+    results_save_path = os.path.join(root_path, f"{model_name}_{experiment_timestamp}_results.csv")
     val_results_df = pd.DataFrame(val_results)  # key, list of values
     val_results_df.to_csv(results_save_path, index=False)
     print(f"Val results saved to {results_save_path}")
