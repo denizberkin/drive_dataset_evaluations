@@ -39,6 +39,7 @@ if __name__ == "__main__":
     
     # Change model here
     model = SwinUnet().to(DEVICE)
+    print()
     optimizer, scheduler = optimizer_setup(model=model, num_epochs=NUM_EPOCHS, lr=LR)
     criterion = BCEDiceLoss().to(DEVICE)
     
@@ -58,12 +59,14 @@ if __name__ == "__main__":
     root_path = os.path.join(EXP_BASE_DIR, EXP_NAME)
     os.makedirs(root_path, exist_ok=True)
 
-    model_save_path = os.path.join(root_path, f"{str(model)}_model.pth")
+    model_name = type(model).__name__
+
+    model_save_path = os.path.join(root_path, f"{model_name}_model.pth")
     torch.save(model.state_dict(), model_save_path)
     print(f"Model saved to {model_save_path}")
     
     # Save the training results
-    results_save_path = os.path.join(root_path, f"{str(model)}_results.csv")
+    results_save_path = os.path.join(root_path, f"{model_name}_results.csv")
     val_results_df = pd.DataFrame(val_results)  # key, list of values
     val_results_df.to_csv(results_save_path, index=False)
     print(f"Val results saved to {results_save_path}")
