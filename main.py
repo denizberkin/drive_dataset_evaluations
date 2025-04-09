@@ -24,7 +24,7 @@ if __name__ == "__main__":
     BATCH_SIZE = 4
     LR = 4.e-4
     NUM_EPOCHS = 40
-    DEVICE = "cpu" if torch.cuda.is_available() else "cpu"
+    DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
     
     set_seed(42)  # set seed for reproducibility
 
